@@ -6,6 +6,8 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todoist/app/landing_page.dart';
+import 'package:todoist/app/lists/add_list_page.dart';
+import 'package:todoist/app/lists/display_list_of_user.dart';
 import 'package:todoist/models/Models.dart';
 import 'package:todoist/pages/profile.dart';
 import 'package:todoist/utils/theme.dart';
@@ -267,7 +269,9 @@ class ListTags extends StatelessWidget {
     final _width = MediaQuery.of(context).size.width / 2 - 20.0;
     final _height = 100.0;
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser()));
+      },
       child: Container(
         margin: EdgeInsets.all(10.0),
         width: _width,

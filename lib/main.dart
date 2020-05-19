@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<User>(create: (context) => User(),),
@@ -50,8 +49,5 @@ class MyApp extends StatelessWidget {
 )
       
       );
-=======
-    return DisplayListOfUser();
->>>>>>> 04623ad9d5f79d545963eb2fe203063f726bb73a
   }
 }
