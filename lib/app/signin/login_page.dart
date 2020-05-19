@@ -8,12 +8,19 @@ import 'package:todoist/widgets/widgets.dart';
 import 'package:todoist/pages/home.dart';
 
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   LoginPage({@required this.toggleFormType});
   final Function toggleFormType;
 
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+
   String _email;
+
   String _password;
 
   bool _checkFormStatus() {
@@ -25,9 +32,28 @@ class LoginPage extends StatelessWidget {
     return false;
   }
 
-  void _submit() {
+  void _submit() async {
     if (_checkFormStatus()) {
+      SharedPreferences sharedPreferences;
       print("email: $_email, password: $_password");
+      var validateUrl = "http://192.168.0.104/auth_api/api/login.php";
+      Map data = {
+        "email": _email,
+        "password": _password,
+      };
+      var jsonData = jsonEncode(data);
+      var response =
+          await http.post(Uri.encodeFull(validateUrl), body: jsonData);
+      if (response.statusCode == 200) {
+        sharedPreferences = await SharedPreferences.getInstance();
+        var encodedJson = jsonDecode(response.body.toString().substring(15));
+        setState(() {
+          sharedPreferences.setString("token", encodedJson["jwt"]);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => DisplayListOfUser()),
+              (Route<dynamic> route) => false);
+        });
+      }
     } else {
       print("Error check your program!");
     }
@@ -140,7 +166,7 @@ class LoginPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Don\'t have an Account? Sign Up'),
-                      onPressed: toggleFormType,
+                      onPressed: widget.toggleFormType,
                     ),
                   ),
                 ],

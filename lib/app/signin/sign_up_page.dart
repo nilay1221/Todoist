@@ -8,12 +8,21 @@ import 'package:todoist/utils/theme.dart';
 import 'package:todoist/widgets/widgets.dart';
 import 'package:todoist/pages/home.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   SignUpPage({@required this.toggleFormType});
   final Function toggleFormType;
+
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+
   String _username;
+
   String _email;
+
   String _password;
 
   bool _checkFormStatus() {
@@ -142,7 +151,7 @@ class SignUpPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Already have an Account? Login'),
-                      onPressed: toggleFormType,
+                      onPressed: widget.toggleFormType,
                     ),
                   ),
                 ],
