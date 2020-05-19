@@ -1,11 +1,25 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-class SignUpPage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todoist/app/lists/display_list_of_user.dart';
+
+class SignUpPage extends StatefulWidget {
   SignUpPage({@required this.toggleFormType});
   final Function toggleFormType;
+
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+
   String _username;
+
   String _email;
+
   String _password;
 
   bool _checkFormStatus() {
@@ -17,9 +31,44 @@ class SignUpPage extends StatelessWidget {
     return false;
   }
 
-  void _submit() {
+  void _submit() async {
     if (_checkFormStatus()) {
       print("username: $_username, email: $_email, password: $_password");
+      String url = 'http://192.168.0.104/auth_api/api/create_user.php';
+      Map<String, String> data = {
+        "username": _username,
+        "image": "imgdfdfdf",
+        "email": _email,
+        "password": _password,
+      };
+      var jsonData = jsonEncode(data);
+      var response = await http.post(Uri.encodeFull(url), body: jsonData);
+      if (response.statusCode == 200) {
+        print("response1 = ${response.body}");
+        String loginUrl = "http://192.168.0.104/auth_api/api/login.php";
+        Map<String, String> loginData = {
+          "email": _email,
+          "password": _password
+        };
+        var loginJsonData = jsonEncode(loginData);
+        var loginResponse =
+            await http.post(Uri.encodeFull(loginUrl), body: loginJsonData);
+        if (loginResponse.statusCode == 200) {
+          var finalData =
+              jsonDecode(loginResponse.body.toString().substring(15));
+          print(finalData["jwt"]);
+          SharedPreferences sharedPreference =
+              await SharedPreferences.getInstance();
+          setState(() {
+            sharedPreference.setString("token", finalData["jwt"]);
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => DisplayListOfUser()),
+                (Route<dynamic> route) => false);
+          });
+        }
+      } else {
+        print("response bad = ${response.body}");
+      }
     } else {
       print("Error check your program!");
     }
@@ -100,7 +149,7 @@ class SignUpPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Already have an Account? Login'),
-                      onPressed: toggleFormType,
+                      onPressed: widget.toggleFormType,
                     ),
                   ),
                 ],
