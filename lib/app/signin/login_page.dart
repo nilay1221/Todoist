@@ -1,4 +1,12 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todoist/api/update.dart';
+import 'package:todoist/models/Models.dart';
+import 'package:todoist/utils/theme.dart';
+import 'package:todoist/widgets/widgets.dart';
+import 'package:todoist/pages/home.dart';
+
 
 class LoginPage extends StatelessWidget {
   LoginPage({@required this.toggleFormType});
@@ -85,7 +93,41 @@ class LoginPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Login'),
-                      onPressed: _submit,
+                      onPressed: ()  async{
+                        if(_checkFormStatus()){
+                          Api api = new Api();
+                          showDialog(context: context,
+                            builder: (context) => LoadingDialog(),
+                            barrierDismissible: false
+                            );
+                            try{
+                              var response = await  api.loginUser(_email, _password);
+                              print(response);
+                              if(response != null) {
+                                // User user = response;
+                                await Provider.of<User>(context,listen: false).saveUser(response);
+                                 await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
+                                Navigator.pop(context);
+                                showDialog(context: context,
+                                    builder: (context) => SuccessDialog(),
+                                    barrierDismissible: false,
+                                  );
+
+                              }
+                              else{
+                                throw Exception();
+                              }
+                            }
+                            catch(e) {
+                                print(e);
+                              Navigator.pop(context);
+                              showDialog(context: context,
+                              builder: (context) => ErrorDialog(title:'Fail',content: 'Login failed!..',),
+                              barrierDismissible: false
+                              );
+                            }
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
@@ -114,6 +156,14 @@ class LoginPage extends StatelessWidget {
     return TextFormField(
       style: TextStyle(color: Colors.white),
       onSaved: (value) => _email = value,
+      validator: (String value) {
+         Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+         RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(value))
+            return 'Enter Valid Email';
+        else
+          return null;},
       textInputAction: TextInputAction.none,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
@@ -149,3 +199,43 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
+
+class SuccessDialog extends StatelessWidget {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        "Login"
+      ),
+      content: Container(
+        width: 100.0,
+        height: 60.0,
+        child: Column(
+          children: <Widget>[
+            AutoSizeText(
+                "You have been logged in Sucessfully",
+                maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("OK"),
+          onPressed: (){
+            Navigator.pop(context);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeDisplay()));
+          },
+        )
+      ],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0),
+    ),
+    );
+  }
+}
+
+

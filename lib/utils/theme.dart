@@ -28,12 +28,14 @@ class AppTheme extends ChangeNotifier {
   Mytheme currentTheme ;
   bool themeSelected ;
 
-  AppTheme(bool isLight)  {
-   getCurrentTheme(isLight);
-  }
+  // AppTheme(bool isLight)  {
+  //  getCurrentTheme(isLight);
+  // }
 
 
-  void selectTheme(bool isLight) async {
+
+
+  Future<void> selectTheme(bool isLight) async {
       if(isLight){
            this.currentTheme =  themes['Light'];
            this.themeSelected = true;

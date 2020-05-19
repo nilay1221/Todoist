@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todoist/app/landing_page.dart';
+import 'package:todoist/models/Models.dart';
 import 'package:todoist/pages/profile.dart';
 import 'package:todoist/utils/theme.dart';
 
@@ -16,6 +18,31 @@ class HomeLoading extends StatefulWidget {
 }
 
 class _HomeLoadingState extends State<HomeLoading> {
+
+  Future<Map> getUserDetails() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    var isUserlogin = preferences.getBool('userlogin') ?? false;
+    if(isUserlogin)
+    {
+      bool isLight = await getCurrentTheme();
+      return {'islogin':true,'theme':isLight};
+    }
+
+    return {'islogin':false};
+    // if(isUserlogin) {
+    //     var username = preferences.getString('username');
+    //     var email = preferences.getString('email');
+    //     var token  = preferences.getString('token');
+    //     bool isLight = preferences.getBool('isLight') ?? false;
+
+    //     AppTheme appTheme = new AppTheme(isLight);
+    //      return {'user': user,'theme':appTheme,'msg':"loggedin"};
+    // }
+    // else{
+    //   return {'msg':'loggedout'};
+    // }
+
+  }
 
   Future<bool> getCurrentTheme() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -32,13 +59,21 @@ class _HomeLoadingState extends State<HomeLoading> {
 
         child: Container(
           child: FutureBuilder(
-            future: getCurrentTheme(),
+            future: getUserDetails(),
             builder: (context, AsyncSnapshot snapshot) {
               if(snapshot.hasData){
-                return ChangeNotifierProvider(
-              create: (context) => AppTheme(snapshot.data),
-                child:HomeDisplay(),
-                  );
+                print(snapshot.data);
+                if(snapshot.data['islogin']){
+                    Provider.of<User>(context,listen: false).getUser();
+                    Provider.of<AppTheme>(context,listen: false).selectTheme(snapshot.data['theme']);
+                    return HomeDisplay();
+                }
+                else{
+
+                  print("User not authenticated");
+                  return LandingPage();
+                }
+                
               }
               return Center(
                 child: Text("TodoList"),
@@ -51,6 +86,27 @@ class _HomeLoadingState extends State<HomeLoading> {
   }
 }
 
+
+class HomeLoggedIn extends StatelessWidget {
+
+  final AppTheme theme ;
+  final User user;
+
+  HomeLoggedIn({this.theme,this.user});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<User>(create: (context) => user,),
+        ChangeNotifierProvider<AppTheme>(create: (context) => theme,)
+      ],
+      child: HomePage()
+      
+      );
+  }
+}
 
 
 

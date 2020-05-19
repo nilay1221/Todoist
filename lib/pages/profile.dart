@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:todoist/models/Models.dart';
 import 'package:todoist/pages/profile_edit.dart';
 import 'package:todoist/pages/settings.dart';
 import 'package:todoist/utils/theme.dart';
@@ -21,6 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     
     final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
+    
     return Scaffold(
       backgroundColor: _currentTheme.scaffold_color,
       body: SingleChildScrollView(
@@ -47,6 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
 class ProfileDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final User user  = Provider.of<User>(context);
     final _width = MediaQuery.of(context).size.width;
     return Container(
       child: Stack(
@@ -97,7 +100,7 @@ class ProfileDisplay extends StatelessWidget {
                               width: 35.0,
                             ),
                             AutoSizeText(
-                              "Nilay Sheth",
+                              "${user.username}",
                               maxLines: 1,
                               style: GoogleFonts.montserrat(
                                 textStyle: TextStyle(
@@ -118,7 +121,9 @@ class ProfileDisplay extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 20.0,),
-                      Text("test@xyz.com")
+                      Text("${user.email}",
+                      style: TextStyle(color:Colors.white),
+                      )
                     ],
                   ),
                 ),
@@ -138,7 +143,7 @@ class ProfileDisplay extends StatelessWidget {
             alignment: Alignment.topRight,
             child: IconButton(icon: Icon(Icons.settings,color:Colors.white,), 
             onPressed: () {
-              Navigator.push(context, PageTransition(child: Settings(), type: PageTransitionType.rightToLeft));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
             }),
           )
         ],

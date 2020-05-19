@@ -1,4 +1,12 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:todoist/api/update.dart';
+import 'package:todoist/models/Models.dart';
+import 'package:todoist/utils/theme.dart';
+import 'package:todoist/widgets/widgets.dart';
+import 'package:todoist/pages/home.dart';
 
 class SignUpPage extends StatelessWidget {
   SignUpPage({@required this.toggleFormType});
@@ -17,9 +25,10 @@ class SignUpPage extends StatelessWidget {
     return false;
   }
 
-  void _submit() {
+  void _submit()  {
     if (_checkFormStatus()) {
-      print("username: $_username, email: $_email, password: $_password");
+      
+
     } else {
       print("Error check your program!");
     }
@@ -87,7 +96,40 @@ class SignUpPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Create Account'),
-                      onPressed: _submit,
+                      onPressed: () async {
+                        if(_checkFormStatus()) {
+                            Api api = new Api();
+                            showDialog(context: context,
+                            builder: (context) => LoadingDialog(),
+                            barrierDismissible: false
+                            );
+                            try{
+                               if(await api.CreateUser(_username, _email, _password)) {
+                                 Map data = await api.loginUser(_email, _password) ;
+                                await Provider.of<User>(context,listen: false).saveUser(data);
+                                 await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
+                                  Navigator.pop(context);
+                                  showDialog(context: context,
+                                    builder: (context) => SuccessDialog(),
+                                    barrierDismissible: false,
+                                  );
+                               }
+                               else{
+                                 throw Exception();
+                               } 
+                            }
+                            catch(e) {
+                              print(e);
+                              Navigator.pop(context);
+                              showDialog(context: context,
+                              builder: (context) => ErrorDialog(),
+                              barrierDismissible: false
+                              );
+                            }
+                            
+
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
@@ -116,6 +158,15 @@ class SignUpPage extends StatelessWidget {
     return TextFormField(
       style: TextStyle(color: Colors.white),
       onSaved: (value) => _username = value,
+      validator: (String value ) {
+        if(value.length ==0) {
+          return 'Please enter username';
+        }
+        else if(value.length < 3) {
+          return "Username should have min 3 characters";
+        }
+        else return null;
+      },
       textInputAction: TextInputAction.none,
       decoration: InputDecoration(
           hasFloatingPlaceholder: true,
@@ -134,6 +185,15 @@ class SignUpPage extends StatelessWidget {
     return TextFormField(
       style: TextStyle(color: Colors.white),
       onSaved: (value) => _email = value,
+      validator: (String value) {
+         Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+         RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(value))
+            return 'Enter Valid Email';
+        else
+          return null;
+        },
       textInputAction: TextInputAction.none,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
@@ -155,6 +215,11 @@ class SignUpPage extends StatelessWidget {
       style: TextStyle(color: Colors.white),
       onSaved: (value) => _password = value,
       textInputAction: TextInputAction.none,
+      validator: (String value) {
+        if(value.length == 0 ) return 'Please enter password' ;
+        else if (value.length < 1) return 'Password should be min 8 characters';
+        else return null;
+      },
       obscureText: true,
       decoration: InputDecoration(
           hasFloatingPlaceholder: true,
@@ -166,6 +231,92 @@ class SignUpPage extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(10))),
           labelStyle: TextStyle(color: Colors.white),
           labelText: 'Password'),
+    );
+  }
+}
+
+
+
+
+
+class ErrorDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0)
+    ),
+    title: Text("Task Failed"),
+    content: Container(
+      width: 100.0,
+      height: 60.0,
+      child: Center(
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.highlight_off,
+            color: Colors.red,
+            size: 40.0,),
+            SizedBox(
+              width: 10.0,
+            ),
+            AutoSizeText(
+              "Please try again later",
+              maxLines: 2,
+            )
+          ],
+        ),
+      ),
+    ),
+    actions: <Widget>[
+      FlatButton(
+        child: Text("OK"),
+        onPressed: (){
+        Navigator.pop(context);
+        },
+      )
+    ],
+  );
+  }
+}
+
+class SuccessDialog extends StatelessWidget {
+
+  // final AppTheme theme;
+  // final User user;
+
+  // SuccessDialog({this.theme,this.user});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        "Registration Complete"
+      ),
+      content: Container(
+        width: 100.0,
+        height: 60.0,
+        child: Column(
+          children: <Widget>[
+            AutoSizeText(
+                "You have been registered Sucessfully",
+                maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("OK"),
+          onPressed: (){
+            Navigator.pop(context);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeDisplay()));
+          },
+        )
+      ],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0),
+    ),
     );
   }
 }
