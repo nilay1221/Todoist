@@ -32,32 +32,32 @@ class _LoginPageState extends State<LoginPage> {
     return false;
   }
 
-  void _submit() async {
-    if (_checkFormStatus()) {
-      SharedPreferences sharedPreferences;
-      print("email: $_email, password: $_password");
-      var validateUrl = "http://192.168.0.104/auth_api/api/login.php";
-      Map data = {
-        "email": _email,
-        "password": _password,
-      };
-      var jsonData = jsonEncode(data);
-      var response =
-          await http.post(Uri.encodeFull(validateUrl), body: jsonData);
-      if (response.statusCode == 200) {
-        sharedPreferences = await SharedPreferences.getInstance();
-        var encodedJson = jsonDecode(response.body.toString().substring(15));
-        setState(() {
-          sharedPreferences.setString("token", encodedJson["jwt"]);
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => DisplayListOfUser()),
-              (Route<dynamic> route) => false);
-        });
-      }
-    } else {
-      print("Error check your program!");
-    }
-  }
+  // void _submit() async {
+  //   if (_checkFormStatus()) {
+  //     SharedPreferences sharedPreferences;
+  //     print("email: $_email, password: $_password");
+  //     var validateUrl = "http://192.168.0.104/auth_api/api/login.php";
+  //     Map data = {
+  //       "email": _email,
+  //       "password": _password,
+  //     };
+  //     var jsonData = jsonEncode(data);
+  //     var response =
+  //         await http.post(Uri.encodeFull(validateUrl), body: jsonData);
+  //     if (response.statusCode == 200) {
+  //       sharedPreferences = await SharedPreferences.getInstance();
+  //       var encodedJson = jsonDecode(response.body.toString().substring(15));
+  //       setState(() {
+  //         sharedPreferences.setString("token", encodedJson["jwt"]);
+  //         Navigator.of(context).pushAndRemoveUntil(
+  //             MaterialPageRoute(builder: (context) => DisplayListOfUser()),
+  //             (Route<dynamic> route) => false);
+  //       });
+  //     }
+  //   } else {
+  //     print("Error check your program!");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

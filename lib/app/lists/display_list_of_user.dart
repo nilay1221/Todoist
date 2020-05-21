@@ -28,12 +28,12 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   @override
   void initState() {
     super.initState();
-    checkLoginStatus();
+    // checkLoginStatus();
     listOfTasks();
   }
 
   listOfTasks() async {
-    String validateUrl = "http://192.168.0.104/auth_api/api/validate_token.php";
+    String validateUrl = "http://10.0.2.2:80/auth_api/api/validate_token.php";
     sharedPreference = await SharedPreferences.getInstance();
     String jwtToken = sharedPreference.getString("token");
     Map data = {"jwt": jwtToken};
@@ -45,7 +45,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
       Map userData = userDataDecoded["data"];
       String uid = userData["id"];
       String displayTaskUrl =
-          "http://192.168.0.104/auth_api/api/user_stats.php";
+          "http://10.0.2.2:80/auth_api/api/user_stats.php";
       Map dataId = {"uid": uid};
       var jsonDataId = jsonEncode(dataId);
       var displayResponse =
@@ -72,7 +72,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   void _delete(String id) async {
     Map data = {"id": id};
     var jsonData = jsonEncode(data);
-    String deleteUrl = "http://192.168.0.104/auth_api/api/delete_task.php";
+    String deleteUrl = "http://10.0.2.2:80/auth_api/api/delete_task.php";
     var response = await http.post(Uri.encodeFull(deleteUrl), body: jsonData);
     if (response.statusCode == 200) {
       print(response.body);
@@ -82,7 +82,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
 
   void _updateTask(Map data) async {
     var updateJsonData = jsonEncode(data);
-    String url = "http://192.168.0.104/auth_api/api/update_task.php";
+    String url = "http://10.0.2.2:80/auth_api/api/update_task.php";
     var response = await http.post(Uri.encodeFull(url), body: updateJsonData);
     if (response.statusCode == 200) {
       print(response.body);
@@ -92,7 +92,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
 
   void _starTask(Map data) async {
     var updateJsonData = jsonEncode(data);
-    String url = "http://192.168.0.104/auth_api/api/star_task.php";
+    String url = "http://10.0.2.2:80/auth_api/api/star_task.php";
     var response = await http.post(Uri.encodeFull(url), body: updateJsonData);
     if (response.statusCode == 200) {
       print(response.body);
@@ -102,7 +102,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
 
   void _completeTask(Map data) async {
     var updateJsonData = jsonEncode(data);
-    String url = "http://192.168.0.104/auth_api/api/complete_task.php";
+    String url = "http://10.0.2.2:80/auth_api/api/complete_task.php";
     var response = await http.post(Uri.encodeFull(url), body: updateJsonData);
     if (response.statusCode == 200) {
       print(response.body);

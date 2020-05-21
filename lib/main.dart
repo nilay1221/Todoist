@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todoist/app/landing_page.dart';
+import 'package:todoist/pages/admin_dashboard.dart';
 import 'package:todoist/pages/home.dart';
 import 'package:todoist/utils/theme.dart';
 

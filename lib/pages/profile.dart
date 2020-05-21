@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:todoist/api/update.dart';
 import 'package:todoist/models/Models.dart';
 import 'package:todoist/pages/profile_edit.dart';
 import 'package:todoist/pages/settings.dart';
@@ -19,10 +20,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
-
-    
     final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
-    
+
     return Scaffold(
       backgroundColor: _currentTheme.scaffold_color,
       body: SingleChildScrollView(
@@ -41,15 +40,13 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
-
-    
   }
 }
 
 class ProfileDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final User user  = Provider.of<User>(context);
+    final User user = Provider.of<User>(context);
     final _width = MediaQuery.of(context).size.width;
     return Container(
       child: Stack(
@@ -120,9 +117,12 @@ class ProfileDisplay extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SizedBox(height: 20.0,),
-                      Text("${user.email}",
-                      style: TextStyle(color:Colors.white),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      Text(
+                        "${user.email}",
+                        style: TextStyle(color: Colors.white),
                       )
                     ],
                   ),
@@ -141,10 +141,15 @@ class ProfileDisplay extends StatelessWidget {
                   })),
           Align(
             alignment: Alignment.topRight,
-            child: IconButton(icon: Icon(Icons.settings,color:Colors.white,), 
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
-            }),
+            child: IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Settings()));
+                }),
           )
         ],
       ),
@@ -153,12 +158,12 @@ class ProfileDisplay extends StatelessWidget {
 }
 
 class TaskStatistic extends StatelessWidget {
-
   TaskStatistic();
 
   @override
   Widget build(BuildContext context) {
-        final theme = Provider.of<AppTheme>(context).currentTheme;
+    final theme = Provider.of<AppTheme>(context).currentTheme;
+    final api = Api();
 
     final _width = MediaQuery.of(context).size.width;
     return GestureDetector(
@@ -169,7 +174,7 @@ class TaskStatistic extends StatelessWidget {
           decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(20.0),
-              color:theme.container_color),
+              color: theme.container_color),
           width: _width,
           child: Column(
             children: <Widget>[
@@ -214,12 +219,29 @@ class TaskStatistic extends StatelessWidget {
                 alignment: AlignmentDirectional.topStart,
                 child: Column(
                   children: <Widget>[
-                    Text(
-                      "2",
-                      style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.bold,
-                          color: theme.font_color),
+                    FutureBuilder(
+                      future: api.getCompletedTasks(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (snapshot.hasData) {
+                          var count = snapshot.data;
+                          return Text(
+                            "${snapshot.data}",
+                            style: TextStyle(
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
+                                color: theme.font_color),
+                          );
+                        }
+                        else{
+                          return Text(
+                            "0",
+                            style: TextStyle(
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
+                                color: theme.font_color),
+                          );
+                        }
+                      },
                     ),
                     Text(
                       "Total Completion",
@@ -231,14 +253,28 @@ class TaskStatistic extends StatelessWidget {
                   ],
                 ),
               ),
-              TweenAnimationBuilder(
-                  duration: const Duration(seconds:1,milliseconds: 5),
-                  tween: Tween<double>(begin: 20.0,end:5.0),
-                  curve: Curves.easeOutCubic,
-                  builder: (BuildContext context, dynamic value, Widget child) {
-                     return TaskChart(maxTasks: value);
-                   },
-               ),  
+              FutureBuilder(
+                future: api.getGraphdetails(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    return TweenAnimationBuilder(
+                      duration: const Duration(seconds: 1, milliseconds: 5),
+                      tween: Tween<double>(begin: 20.0, end: 5.0),
+                      curve: Curves.easeOutCubic,
+                      builder:
+                          (BuildContext context, dynamic value, Widget child) {
+                        return TaskChart(
+                          maxTasks: value,
+                          numberOfTasks: snapshot.data,
+                        );
+                      },
+                    );
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
+
               // TaskChart(
               //   maxTasks: 5.0,
               // )
@@ -250,12 +286,12 @@ class TaskStatistic extends StatelessWidget {
 
 class TaskChart extends StatelessWidget {
   final maxTasks;
+  final List<int> numberOfTasks;
 
-  TaskChart({this.maxTasks});
+  TaskChart({this.maxTasks, this.numberOfTasks});
 
   @override
   Widget build(BuildContext context) {
-
     final theme = Provider.of<AppTheme>(context).currentTheme;
 
     return BarChart(
@@ -320,34 +356,48 @@ class TaskChart extends StatelessWidget {
           show: false,
         ),
         barGroups: [
-          BarChartGroupData(
-              x: 0,
-              barRods: [BarChartRodData(y: 0, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 1,
-              barRods: [BarChartRodData(y: 0, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 2,
-              barRods: [BarChartRodData(y: 0, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 3,
-              barRods: [BarChartRodData(y: 0, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 3,
-              barRods: [BarChartRodData(y: 0, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 3,
-              barRods: [BarChartRodData(y: 1, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
-          BarChartGroupData(
-              x: 7,
-              barRods: [BarChartRodData(y: 4, color: Colors.purpleAccent)],
-              showingTooltipIndicators: [0]),
+          BarChartGroupData(x: 0, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[6].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 1, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[5].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 2, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[4].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 3, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[3].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 3, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[2].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 3, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[1].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
+          BarChartGroupData(x: 7, barRods: [
+            BarChartRodData(
+                y: numberOfTasks[0].toDouble(), color: Colors.purpleAccent)
+          ], showingTooltipIndicators: [
+            0
+          ]),
         ],
       ),
     );

@@ -214,39 +214,7 @@ class HomeDisplay extends StatelessWidget {
               SizedBox(
                 height: 15.0,
               ),
-              Container(
-                alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(left: 20.0),
-                child: Text(
-                  "My Lists",
-                  textAlign: TextAlign.left,
-                  style: GoogleFonts.roboto(
-                    textStyle: TextStyle(
-                      color: _currentTheme.font_color,
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20.0,
-              ),
-              ListView.builder(
-                itemCount: 1,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  return MyLists(
-                    count: 1,
-                    icon: Icon(
-                      Icons.format_list_bulleted,
-                      color: Colors.white,
-                    ),
-                    listName: "Reminders",
-                    iconBackgroundColor: Colors.orange,
-                  );
-                },
-              ),
+              
             ],
           ),
         ),
@@ -391,6 +359,50 @@ class MyLists extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+class MyListsContainer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: 20.0),
+                child: Text(
+                  "My Lists",
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.roboto(
+                    textStyle: TextStyle(
+                      // color: _currentTheme.font_color,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              ListView.builder(
+                itemCount: 1,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return MyLists(
+                    count: 1,
+                    icon: Icon(
+                      Icons.format_list_bulleted,
+                      color: Colors.white,
+                    ),
+                    listName: "Reminders",
+                    iconBackgroundColor: Colors.orange,
+                  );
+                },
+              ),
+      ],
+      
     );
   }
 }
