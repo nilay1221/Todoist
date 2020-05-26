@@ -27,6 +27,9 @@ class _ProfileEditState extends State<ProfileEdit> {
       Api api = new Api();
       String new_token = await api.updateEmail(new_email, user);
       // print(new_token);
+      if (new_token == "Email already exists.") {
+        return null;
+      }
       return new_token;
   }
 
@@ -113,8 +116,15 @@ class _ProfileEditState extends State<ProfileEdit> {
                   await pr.show();
                   String new_email = data['new_value'];
                   String new_token = await updateEmail(new_email, user);
-                  await Provider.of<User>(context,listen: false).updateEmail(new_email, new_token);
-                  await pr.hide();
+                  if(new_token != null ){
+                    await Provider.of<User>(context,listen: false).updateEmail(new_email, new_token);
+                    await pr.hide();
+                  }
+                  else{
+                    await pr.hide();
+                    showDialog(context: context,builder: (context) => ErrorDialog(title: "Update Error",content: "Email id already exists.\nPlease try again"));     
+                  }
+                  
                 }
               },
               title: Text(

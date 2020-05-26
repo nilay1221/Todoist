@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todoist/api/update.dart';
+import 'package:todoist/app/admin/admin_home_page.dart';
 import 'package:todoist/models/Models.dart';
 import 'package:todoist/utils/theme.dart';
 import 'package:todoist/widgets/widgets.dart';
@@ -23,6 +24,14 @@ class _LoginPageState extends State<LoginPage> {
 
   String _password;
 
+  String _username;
+
+  bool adminLogin = false;
+
+  String loginType = "Admin Login?" ;
+
+
+
   bool _checkFormStatus() {
     final form = _formKey.currentState;
     if (form.validate()) {
@@ -32,32 +41,84 @@ class _LoginPageState extends State<LoginPage> {
     return false;
   }
 
-  // void _submit() async {
-  //   if (_checkFormStatus()) {
-  //     SharedPreferences sharedPreferences;
-  //     print("email: $_email, password: $_password");
-  //     var validateUrl = "http://192.168.0.104/auth_api/api/login.php";
-  //     Map data = {
-  //       "email": _email,
-  //       "password": _password,
-  //     };
-  //     var jsonData = jsonEncode(data);
-  //     var response =
-  //         await http.post(Uri.encodeFull(validateUrl), body: jsonData);
-  //     if (response.statusCode == 200) {
-  //       sharedPreferences = await SharedPreferences.getInstance();
-  //       var encodedJson = jsonDecode(response.body.toString().substring(15));
-  //       setState(() {
-  //         sharedPreferences.setString("token", encodedJson["jwt"]);
-  //         Navigator.of(context).pushAndRemoveUntil(
-  //             MaterialPageRoute(builder: (context) => DisplayListOfUser()),
-  //             (Route<dynamic> route) => false);
-  //       });
-  //     }
-  //   } else {
-  //     print("Error check your program!");
-  //   }
-  // }
+  void AdminLoginToggle() {
+    setState(() {
+      if(adminLogin){
+        adminLogin =false;
+        this.loginType = "Admin Login?";
+      } 
+      else {
+        adminLogin = true;
+        this.loginType = "User Login?";
+      }
+    });
+  }
+
+
+
+void onLoginSubmit() async {
+     Api api = new Api();
+  showDialog(context: context,
+    builder: (context) => LoadingDialog(),
+    barrierDismissible: false
+    );
+    try{
+      if(adminLogin == false)
+      {
+        var response = await  api.loginUser(_email, _password);
+      print(response);
+      if(response != null && response['username'] != "blocked") {
+        // User user = response;
+        await Provider.of<User>(context,listen: false).saveUser(response);
+          await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
+          var task_details = await api.getTaskdetails(response['uid']);
+          print(task_details);
+          await Provider.of<TaskStats>(context,listen: false).getDetails(task_details);
+        Navigator.pop(context);
+        showDialog(context: context,
+            builder: (context) => SuccessDialog(),
+            barrierDismissible: false,
+          );
+
+      }
+      else if ( response!= null && response['username'] == "blocked" )
+       {
+         Navigator.pop(context);
+        showDialog(context: context,
+        builder: (context) => ErrorDialog(title:'Blocked',content: 'You were blocked \n by your admin.',),
+        barrierDismissible: false
+      );
+       }
+      else{
+        throw Exception();
+      }
+        
+      }
+      if(adminLogin) {
+
+        var response = await api.adminLogin(_username, _password);
+        if(response!=null) {
+             Provider.of<User>(context,listen: false).saveAdmin(response);
+              await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
+              Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AdminHomePage()));
+
+        }
+
+      }
+      
+    }
+    catch(e) {
+        print(e);
+      Navigator.pop(context);
+      showDialog(context: context,
+      builder: (context) => ErrorDialog(title:'Fail',content: 'Login failed!..',),
+      barrierDismissible: false
+      );
+  }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  _emailInputField(),
+                 adminLogin ?_usernameInputField() : _emailInputField(),
                   SizedBox(height: 10.0),
                   _passwordInputField(),
                   SizedBox(height: 10.0),
@@ -121,37 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text('Login'),
                       onPressed: ()  async{
                         if(_checkFormStatus()){
-                          Api api = new Api();
-                          showDialog(context: context,
-                            builder: (context) => LoadingDialog(),
-                            barrierDismissible: false
-                            );
-                            try{
-                              var response = await  api.loginUser(_email, _password);
-                              print(response);
-                              if(response != null) {
-                                // User user = response;
-                                await Provider.of<User>(context,listen: false).saveUser(response);
-                                 await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
-                                Navigator.pop(context);
-                                showDialog(context: context,
-                                    builder: (context) => SuccessDialog(),
-                                    barrierDismissible: false,
-                                  );
-
-                              }
-                              else{
-                                throw Exception();
-                              }
-                            }
-                            catch(e) {
-                                print(e);
-                              Navigator.pop(context);
-                              showDialog(context: context,
-                              builder: (context) => ErrorDialog(title:'Fail',content: 'Login failed!..',),
-                              barrierDismissible: false
-                              );
-                            }
+                         onLoginSubmit();
                         }
                       },
                     ),
@@ -167,6 +198,19 @@ class _LoginPageState extends State<LoginPage> {
                       textColor: Colors.white,
                       child: Text('Don\'t have an Account? Sign Up'),
                       onPressed: widget.toggleFormType,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      // side: BorderSide(color: Colors.white)),
+                      padding: EdgeInsets.only(left: 50, right: 50),
+                      textColor: Colors.white,
+                      child: Text(loginType),
+                      onPressed: () => AdminLoginToggle(),
                     ),
                   ),
                 ],
@@ -224,7 +268,47 @@ class _LoginPageState extends State<LoginPage> {
           labelText: 'Password'),
     );
   }
+
+
+  Widget _usernameInputField() {
+    return TextFormField(
+      style: TextStyle(color: Colors.white),
+      onSaved: (value) => _username = value,
+      validator: (String value ) {
+        if(value.length ==0) {
+          return 'Please enter username';
+        }
+        else if(value.length < 3) {
+          return "Username should have min 3 characters";
+        }
+        else return null;
+      },
+      textInputAction: TextInputAction.none,
+      decoration: InputDecoration(
+          hasFloatingPlaceholder: true,
+          focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+          enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+          labelStyle: TextStyle(color: Colors.white),
+          labelText: 'Admin Username'),
+    );
+  }
+
+
+
+
+
+
+
 }
+
+
+
+  
+
 
 
 class SuccessDialog extends StatelessWidget {

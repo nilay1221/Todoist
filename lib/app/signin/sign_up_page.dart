@@ -117,6 +117,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                  Map data = await api.loginUser(_email, _password) ;
                                 await Provider.of<User>(context,listen: false).saveUser(data);
                                  await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
+                                 var task_details = await api.getTaskdetails(data['uid']);
+                                 await Provider.of<TaskStats>(context,listen: false).getDetails(task_details);
                                   Navigator.pop(context);
                                   showDialog(context: context,
                                     builder: (context) => SuccessDialog(),

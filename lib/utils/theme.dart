@@ -5,8 +5,9 @@ class Mytheme {
   Color scaffold_color;
   Color font_color;
   Color container_color;
+  Color header_paint;
 
-  Mytheme({this.scaffold_color, this.font_color, this.container_color});
+  Mytheme({this.scaffold_color, this.font_color, this.container_color,this.header_paint});
 }
 
 
@@ -18,21 +19,27 @@ class AppTheme extends ChangeNotifier {
     "Dark": Mytheme(
         scaffold_color: Colors.black,
         font_color: Colors.white,
-        container_color: Colors.grey[900]),
+        container_color: Colors.grey[900],
+        header_paint: Colors.purpleAccent
+        ),
     "Light": Mytheme(
         scaffold_color: Colors.grey[300],
         font_color: Colors.black,
-        container_color: Colors.white)
+        container_color: Colors.white,
+        header_paint: Color(0xFFe06a76)
+        )
   };
 
   Mytheme currentTheme ;
-  bool themeSelected ;
+  bool themeSelected;
 
   // AppTheme(bool isLight)  {
   //  getCurrentTheme(isLight);
   // }
 
-
+  AppTheme() {
+    selectTheme(false);
+  }
 
 
   Future<void> selectTheme(bool isLight) async {

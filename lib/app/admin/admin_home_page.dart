@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:todoist/app/admin/blocked_user_page.dart';
 import 'package:todoist/app/admin/unblocked_user_page.dart';
+import 'package:todoist/pages/admin_dashboard.dart';
 
 class AdminHomePage extends StatefulWidget {
   @override
@@ -21,12 +22,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   void totalUser() async {
-    String url = "http://192.168.0.104/auth_api/api/admin_stats.php";
+    String url = "http://10.0.2.2:80/auth_api/api/admin_stats.php";
     Map data = {"id": "2"};
     var jsonData = jsonEncode(data);
     var response = await http.post(Uri.encodeFull(url), body: jsonData);
     if (response.statusCode == 200) {
-      var finalData = jsonDecode(response.body.substring(15));
+      var finalData = jsonDecode(response.body);
       print(finalData);
       setState(() {
         _totalBlockedUser = finalData["allBlockedUsers"];
@@ -43,7 +44,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
         centerTitle: true,
         titleSpacing: 1.0,
       ),
-      body: _buildContent(context),
+      body: Column(
+        children: <Widget>[
+          _buildContent(context),
+          dashboardButton(context)
+
+        ],
+      ),
     );
   }
 
@@ -129,4 +136,28 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
     );
   }
+}
+
+
+Widget dashboardButton(BuildContext context) {
+
+  return SizedBox(
+    height: 50.0,
+      child: RaisedButton(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0)
+      ),
+      child: Text("View Dashboard"),
+      onPressed: () {
+      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => DashboarLoading(
+                      ),
+                    ),
+                  );
+      }
+    ),
+  );
+
 }

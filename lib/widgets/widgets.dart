@@ -57,9 +57,11 @@ class ErrorDialog extends StatelessWidget {
             SizedBox(
               width: 10.0,
             ),
-            AutoSizeText(
-              content,
-              maxLines: 2,
+            Container(
+              child: AutoSizeText(
+                content,
+                maxLines: 3,
+              ),
             )
           ],
         ),

@@ -3,49 +3,73 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:todoist/api/update.dart';
+import 'package:todoist/pages/settings.dart';
 import 'package:todoist/utils/theme.dart';
 import 'dart:math' as math;
 
+
+
+class DashboarLoading extends StatelessWidget {
+
+
+
+  Future<Map> getDetails() async {
+    Api api = Api();
+    Map data = await api.dashboardDetails();
+    print(data);
+    int percent = 100 - (((data['total_tasks'] - data['completed_tasks']) ~/ data['total_tasks']) *100);
+    data['percentage'] = percent;
+    return data;
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: getDetails(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if(snapshot.hasData){
+          return Dashboard(data: snapshot.data,);
+        }
+        else{
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator(),),
+          );
+        }
+      },
+    );
+  }
+}
+
 class Dashboard extends StatefulWidget {
+
+  Map data;
+
+  Dashboard({this.data});
+
   @override
   _DashboardState createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-
-  Map data ;
+  
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getDetails();
-
+    // getDetails();
   }
 
-
-
-  void getDetails() async {
-    Api api = Api();
-    Map data = await api.dashboardDetails();
-    print(data);
-    setState(() {
-      this.data = data;
-      int percent = 100 -(((data['total_tasks'] - data['completed_tasks'])~/data['total_tasks']) * 100 );
-      this.data['percentage'] = percent;
-      print(percent);
-    });
-  }
-
-
-
+  
 
   @override
   Widget build(BuildContext context) {
-        final _width = MediaQuery.of(context).size.width;
+    final _width = MediaQuery.of(context).size.width;
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _currentTheme.scaffold_color,
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -53,85 +77,75 @@ class _DashboardState extends State<Dashboard> {
               child: Stack(
                 children: <Widget>[
                   CustomPaint(
-                    size: Size((2*_width),300.0),
-                    foregroundPainter: HeaderPainter(),
+                    size: Size((2 * _width), 300.0),
+                    foregroundPainter: HeaderPainter(paint_color: _currentTheme.header_paint),
                   ),
                   Container(
-                      margin: EdgeInsets.only(top: 30.0, left: 20.0, right: 15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            "Dashboard",
-                            style: GoogleFonts.mPlusRounded1c(
-                              textStyle: TextStyle(color: Colors.white),
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    margin: EdgeInsets.only(top: 30.0, left: 20.0, right: 15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        IconButton(icon: Icon(Icons.arrow_back,color: Colors.white,),onPressed: () {Navigator.pop(context);}),
+                        Text(
+                          "Dashboard",
+                          style: GoogleFonts.mPlusRounded1c(
+                            textStyle: TextStyle(color: Colors.white),
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.w700,
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              // Provider.of<AppTheme>(context, listen: false)
-                              //     .selectTheme('Normal');
-                              Api api = Api();
-                              api.getGraphdetails();
-                            },
-                            child: Hero(
-                              tag: "Avatar",
-                              child: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    "https://i.pinimg.com/236x/6a/c4/5e/6ac45ea5a3f5ace324b79b8f36d30f27.jpg"),
-                                radius: 22.0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                          IconButton(
+                            icon: Icon(Icons.settings, color: Colors.white),
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
+                            }),
+                      ],
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 130.0),
-                                    child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Container(
-                          margin: EdgeInsets.only(left: _width / 4 - 50.0),
-                          child: Row(
-                            children: <Widget>[
-                              AdminTags(
-                                icon:
-                                    Icon(Icons.people, size: 30.0, color: Colors.blue),
-                                count: data['total_users'],
-                                text: "Total Users",
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 130.0),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        margin: EdgeInsets.only(left: _width / 4 - 50.0),
+                        child: Row(
+                          children: <Widget>[
+                            AdminTags(
+                              icon: Icon(Icons.people,
+                                  size: 30.0, color: Colors.blue),
+                              count: widget.data['total_users'] ?? 0,
+                              text: "Total Users",
+                            ),
+                            AdminTags(
+                              icon: FaIcon(
+                                FontAwesomeIcons.tasks,
+                                size: 30.0,
+                                color: Colors.orangeAccent,
                               ),
-                              AdminTags(
-                                icon: FaIcon(
-                                  FontAwesomeIcons.tasks,
-                                  size: 30.0,
-                                  color: Colors.orangeAccent,
-                                ),
-                                count: data['total_tasks'],
-                                text: "Tasks Created",
+                              count: widget.data['total_tasks'] ?? 0,
+                              text: "Tasks Created",
+                            ),
+                            AdminTags(
+                              icon: FaIcon(
+                                FontAwesomeIcons.check,
+                                size: 30.0,
+                                color: Colors.green,
                               ),
-                              AdminTags(
-                                icon: FaIcon(
-                                  FontAwesomeIcons.check,
-                                  size: 30.0,
-                                  color: Colors.green,
-                                ),
-                                count: data['completed_tasks'],
-                                text: "Tasks Completed",
-                              ),
-                            ],
-                          ),
+                              count: widget.data['completed_tasks'] ?? 0,
+                              text: "Tasks Completed",
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
             SizedBox(
-                height: 40.0,
-              ),
-              CompletionRate(data['percentage']),
+              height: 20.0,
+            ),
+            CompletionRate(widget.data['percentage'] ?? 0),
           ],
         ),
       ),
@@ -197,7 +211,6 @@ class AdminTags extends StatelessWidget {
 }
 
 class CompletionRate extends StatelessWidget {
-
   final percentage;
   CompletionRate(this.percentage);
   @override
@@ -280,8 +293,8 @@ class _CompletionRateBarState extends State<CompletionRateBar>
     setState(() {
       value = _controller.value * this.degree;
       each_percentage = ((value * 100) ~/ sweepAngle).toInt();
-      print(value);
-      print(each_percentage);
+      // print(value);
+      // print(each_percentage);
     });
   }
 
@@ -360,14 +373,17 @@ class BarPainter extends CustomPainter {
   bool shouldRebuildSemantics(BarPainter oldDelegate) => false;
 }
 
-
-
 class HeaderPainter extends CustomPainter {
+
+  Color paint_color;
+
+  HeaderPainter({this.paint_color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Rect.fromLTRB(-100, -100.0, size.width + 100, 250);
     final paint = Paint()
-      ..color = Color(0xFFe06a76)
+      ..color = this.paint_color
       ..style = PaintingStyle.fill
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
@@ -384,3 +400,5 @@ class HeaderPainter extends CustomPainter {
   @override
   bool shouldRebuildSemantics(HeaderPainter oldDelegate) => false;
 }
+
+// Color(0xFFe06a76)

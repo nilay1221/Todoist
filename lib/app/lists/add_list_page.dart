@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:todoist/app/lists/display_list_of_user.dart';
+import 'package:todoist/models/Models.dart';
 
 class AddListPage extends StatefulWidget {
   @override
@@ -32,7 +34,7 @@ class _AddListPageState extends State<AddListPage> {
       print("Task added");
       print('task: $_task, datetime: $_date');
       String validateUrl =
-          "http://192.168.0.104/auth_api/api/validate_token.php";
+          "http://10.0.2.2:80/auth_api/api/validate_token.php";
       sharedPreferences = await SharedPreferences.getInstance();
       String jwtToken = sharedPreferences.getString("token");
       Map data = {"jwt": jwtToken};
@@ -44,16 +46,19 @@ class _AddListPageState extends State<AddListPage> {
         Map userData = userDataDecoded["data"];
         String uid = userData["id"];
         String createTaskUrl =
-            "http://192.168.0.104/auth_api/api/create_task.php";
+            "http://10.0.2.2:80/auth_api/api/create_task.php";
         Map taskData = {"task": _task, "date_time": "$_date", "uid": uid};
         var taskJsonData = jsonEncode(taskData);
+        print(taskJsonData);
         var taskResponse =
             await http.post(Uri.encodeFull(createTaskUrl), body: taskJsonData);
+        print(taskResponse.statusCode);
         if (taskResponse.statusCode == 200) {
           print(taskResponse.body);
+          Provider.of<TaskStats>(context,listen: false).taskadd(taskData);
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => DisplayListOfUser()),
-              (Route<dynamic> route) => false);
+              ModalRoute.withName('/login'));
         }
       }
     }

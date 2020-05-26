@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todoist/app/landing_page.dart';
 import 'package:todoist/app/lists/add_list_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:todoist/models/Models.dart';
 
 class DisplayListOfUser extends StatefulWidget {
   @override
@@ -41,19 +43,24 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     var response =
         await http.post(Uri.encodeFull(validateUrl), body: jsonDataEncode);
     if (response.statusCode == 200) {
-      var userDataDecoded = jsonDecode(response.body);
+      var userDataDecoded = jsonDecode(response.body.toString());
+      print(userDataDecoded);
       Map userData = userDataDecoded["data"];
       String uid = userData["id"];
       String displayTaskUrl =
           "http://10.0.2.2:80/auth_api/api/user_stats.php";
       Map dataId = {"uid": uid};
       var jsonDataId = jsonEncode(dataId);
+      // print(jsonDataId);
       var displayResponse =
           await http.post(Uri.encodeFull(displayTaskUrl), body: jsonDataId);
+      print(displayResponse.statusCode);
       if (displayResponse.statusCode == 200) {
+        print("got response");
+        print(displayResponse.body);
         setState(() {
           finalData =
-              jsonDecode(displayResponse.body.toString().substring(25))["data"];
+              jsonDecode(displayResponse.body.toString())["allTasksdata"];
         });
         print(finalData);
       }
@@ -94,6 +101,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     var updateJsonData = jsonEncode(data);
     String url = "http://10.0.2.2:80/auth_api/api/star_task.php";
     var response = await http.post(Uri.encodeFull(url), body: updateJsonData);
+    print(response.statusCode);
     if (response.statusCode == 200) {
       print(response.body);
       listOfTasks();
@@ -150,7 +158,9 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                     key: Key('task-${DateTime.now()}'),
                     background: Container(color: Colors.red),
                     direction: DismissDirection.endToStart,
-                    onDismissed: (direction) => _delete(finalData[index]["id"]),
+                    onDismissed: (direction){
+                      Provider.of<TaskStats>(context,listen: false).taskDelete(finalData[index]);
+                      _delete(finalData[index]["id"]);},
                     child: ListTile(
                       leading: FlatButton(
                         child: CircleAvatar(
@@ -164,6 +174,8 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                           ),
                         ),
                         onPressed: () {
+                          
+                          
                           if (finalData[index]["status"] == "0") {
                             _completeTask(
                                 {"id": finalData[index]["id"], "status": "1"});
@@ -183,12 +195,14 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                               : Colors.teal,
                         ),
                         onPressed: () {
+                          Provider.of<TaskStats>(context,listen: false).starTask(finalData[index]["priority"]);
                           if (finalData[index]["priority"] == "0") {
                             _starTask({
                               "id": finalData[index]["id"],
                               "priority": "1"
                             });
                           } else {
+                            print(finalData[index]["priority"]);
                             _starTask({
                               "id": finalData[index]["id"],
                               "priority": "0"

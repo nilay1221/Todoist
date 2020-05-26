@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todoist/api/update.dart';
+import 'package:todoist/app/admin/admin_home_page.dart';
 import 'package:todoist/app/landing_page.dart';
 import 'package:todoist/app/lists/add_list_page.dart';
 import 'package:todoist/app/lists/display_list_of_user.dart';
@@ -26,24 +28,21 @@ class _HomeLoadingState extends State<HomeLoading> {
     var isUserlogin = preferences.getBool('userlogin') ?? false;
     if(isUserlogin)
     {
-      bool isLight = await getCurrentTheme();
-      return {'islogin':true,'theme':isLight};
+      String userType = preferences.getString('userType');
+       bool isLight = await getCurrentTheme();
+      if(userType == "admin") {
+        return {'islogin':true,'userType':'admin','theme':isLight};
+      }
+     else{
+        String uid = preferences.getString('uid');
+      Api api = Api();
+      var task_details =await api.getTaskdetails(uid);
+      return {'islogin':true,'theme':isLight,'task_details':task_details};
+     }
+      
     }
 
     return {'islogin':false};
-    // if(isUserlogin) {
-    //     var username = preferences.getString('username');
-    //     var email = preferences.getString('email');
-    //     var token  = preferences.getString('token');
-    //     bool isLight = preferences.getBool('isLight') ?? false;
-
-    //     AppTheme appTheme = new AppTheme(isLight);
-    //      return {'user': user,'theme':appTheme,'msg':"loggedin"};
-    // }
-    // else{
-    //   return {'msg':'loggedout'};
-    // }
-
   }
 
   Future<bool> getCurrentTheme() async {
@@ -65,7 +64,12 @@ class _HomeLoadingState extends State<HomeLoading> {
             builder: (context, AsyncSnapshot snapshot) {
               if(snapshot.hasData){
                 print(snapshot.data);
-                if(snapshot.data['islogin']){
+                if(snapshot.data['islogin'] && snapshot.data['userType'] == "admin") {
+                  Provider.of<AppTheme>(context,listen: false).selectTheme(snapshot.data['theme']);
+                  return AdminHomePage();
+                }
+                else if(snapshot.data['islogin']){
+                    Provider.of<TaskStats>(context,listen: false).getDetails(snapshot.data['task_details']);
                     Provider.of<User>(context,listen: false).getUser();
                     Provider.of<AppTheme>(context,listen: false).selectTheme(snapshot.data['theme']);
                     return HomeDisplay();
@@ -128,6 +132,7 @@ class HomeDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
+    final task_details = Provider.of<TaskStats>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text("Todoist",
@@ -166,7 +171,7 @@ class HomeDisplay extends StatelessWidget {
               Row(
                 children: <Widget>[
                   ListTags(
-                    counter: 0,
+                    counter: task_details.today_count,
                     icon: Icon(
                       Icons.today,
                       color: Colors.white,
@@ -190,7 +195,7 @@ class HomeDisplay extends StatelessWidget {
               Row(
                 children: <Widget>[
                   ListTags(
-                    counter: 0,
+                    counter: task_details.all_count,
                     icon: Icon(
                       Icons.inbox,
                       color: Colors.white,
@@ -200,7 +205,7 @@ class HomeDisplay extends StatelessWidget {
                     iconBackgroundColor: Colors.grey,
                   ),
                   ListTags(
-                    counter: 0,
+                    counter: task_details.flagged_count,
                     icon: Icon(
                       Icons.flag,
                       color: Colors.white,
