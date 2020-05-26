@@ -22,12 +22,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   void totalUser() async {
-    String url = "http://10.0.2.2:80/auth_api/api/admin_stats.php";
+    String url = "http://192.168.0.104/auth_api/api/admin_stats.php";
     Map data = {"id": "2"};
     var jsonData = jsonEncode(data);
     var response = await http.post(Uri.encodeFull(url), body: jsonData);
     if (response.statusCode == 200) {
-      var finalData = jsonDecode(response.body);
+      var finalData = jsonDecode(response.body.substring(15));
       print(finalData);
       setState(() {
         _totalBlockedUser = finalData["allBlockedUsers"];

@@ -24,7 +24,7 @@ class _BlockedUserPageState extends State<BlockedUserPage> {
   }
 
   listOfBlockedUser() async {
-    String url = "http://10.0.2.2:80/auth_api/api/admin_stats.php";
+    String url = "http://192.168.0.104/auth_api/api/admin_stats.php";
     Map data = {"id": "2"};
     var jsonData = jsonEncode(data);
     var response = await http.post(Uri.encodeFull(url), body: jsonData);
@@ -38,7 +38,7 @@ class _BlockedUserPageState extends State<BlockedUserPage> {
   }
 
   void updateUserStatus(String id, String username) async {
-    String url = "http://10.0.2.2:80/auth_api/api/status_user.php";
+    String url = "http://192.168.0.104/auth_api/api/status_user.php";
     print("id = $id");
     Map data = {"id": id, "status": "1"};
     var jsonData = jsonEncode(data);

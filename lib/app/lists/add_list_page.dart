@@ -34,9 +34,10 @@ class _AddListPageState extends State<AddListPage> {
       print("Task added");
       print('task: $_task, datetime: $_date');
       String validateUrl =
-          "http://10.0.2.2:80/auth_api/api/validate_token.php";
+          "https://todoistapi.000webhostapp.com/validate_token.php";
       sharedPreferences = await SharedPreferences.getInstance();
       String jwtToken = sharedPreferences.getString("token");
+      print("$jwtToken");
       Map data = {"jwt": jwtToken};
       var jsonDataEncode = jsonEncode(data);
       var response =
@@ -46,19 +47,16 @@ class _AddListPageState extends State<AddListPage> {
         Map userData = userDataDecoded["data"];
         String uid = userData["id"];
         String createTaskUrl =
-            "http://10.0.2.2:80/auth_api/api/create_task.php";
+            "https://todoistapi.000webhostapp.com/create_task.php";
         Map taskData = {"task": _task, "date_time": "$_date", "uid": uid};
         var taskJsonData = jsonEncode(taskData);
-        print(taskJsonData);
         var taskResponse =
             await http.post(Uri.encodeFull(createTaskUrl), body: taskJsonData);
-        print(taskResponse.statusCode);
         if (taskResponse.statusCode == 200) {
           print(taskResponse.body);
-          Provider.of<TaskStats>(context,listen: false).taskadd(taskData);
           Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => DisplayListOfUser()),
-              ModalRoute.withName('/login'));
+              MaterialPageRoute(builder: (context) => HomePage()),
+              (Route<dynamic> route) => false);
         }
       }
     }
