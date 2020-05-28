@@ -10,7 +10,7 @@ class User extends ChangeNotifier{
 
   // User(this.username,this.email,this.token);
 
-  Future<void> getUser() async {
+  Future<String> getUser() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String user =preferences.getString('username') ?? '';
     String email = preferences.getString('email') ?? '';
@@ -21,6 +21,7 @@ class User extends ChangeNotifier{
     print(username);
 
     notifyListeners();
+    return this.username;
   }
 
    Future<void> saveUser(Map data) async{
@@ -37,6 +38,7 @@ class User extends ChangeNotifier{
     this.uid = data['uid'];
 
     notifyListeners();
+    
   }
 
   Future<void> saveAdmin(Map data) async {
@@ -99,13 +101,14 @@ class TaskStats extends ChangeNotifier {
 
   void taskadd(Map task) {
     DateTime today_date = DateTime.now();
-    DateTime task_date = DateTime.parse(task['date_time']);
-    if(today_date.difference(task_date).inDays == 0) {
+    print(task['date_time'].toString());
+    DateTime task_date = DateTime.parse(task['date_time'].toString());
+    if(today_date.difference(task_date).inDays == 0 && today_date.day == task_date.day) {
       
       this.today_count += 1;
     }
     this.all_count += 1;
-
+    // print("notify");
     notifyListeners();
   }
 
@@ -115,10 +118,10 @@ class TaskStats extends ChangeNotifier {
     // print(task);
     DateTime today_date = DateTime.now();
     DateTime task_date = DateTime.parse(task['date_time']);
-    if(today_date.difference(task_date).inDays == 0) {
+    if(today_date.difference(task_date).inDays == 0 && task_date.day == today_date.day) {
       this.today_count -= 1;
     }
-    if(task['status'] == "1") {
+    if(task['priority'] == "1") {
       this.flagged_count -= 1;
       
     }
@@ -131,10 +134,10 @@ class TaskStats extends ChangeNotifier {
     print("inside star task");
     print(status);
     if(status == "1") {
-      this.flagged_count += 1;
+      this.flagged_count -= 1;
     }
     else if (status == "0") {
-      this.flagged_count -= 1;
+      this.flagged_count += 1;
     }
     notifyListeners();
   }

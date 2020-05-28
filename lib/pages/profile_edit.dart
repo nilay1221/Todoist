@@ -60,20 +60,6 @@ class _ProfileEditState extends State<ProfileEdit> {
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text(
-                "Avatar",
-                style: TextStyle(color: theme.font_color),
-              ),
-              trailing: Hero(
-                tag: "Avatar",
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      "https://i.pinimg.com/236x/6a/c4/5e/6ac45ea5a3f5ace324b79b8f36d30f27.jpg"),
-                  radius: 20.0,
-                ),
-              ),
-            ),
-            ListTile(
               onTap: () async {
                 Map data = await showDialog(
                     context: context,

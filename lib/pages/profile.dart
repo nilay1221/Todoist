@@ -48,21 +48,13 @@ class ProfileDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final User user = Provider.of<User>(context);
     final _width = MediaQuery.of(context).size.width;
+    final current_theme = Provider.of<AppTheme>(context).currentTheme;
     return Container(
       child: Stack(
         children: <Widget>[
           Container(
             width: _width,
             height: 250.0,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: NetworkImage(
-                        "https://i.pinimg.com/236x/6a/c4/5e/6ac45ea5a3f5ace324b79b8f36d30f27.jpg"),
-                    fit: BoxFit.cover)),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 25.0, sigmaY: 25.0),
-              child: Container(color: Colors.black.withOpacity(0.1)),
-            ),
           ),
           Positioned.fill(
               top: 70.0,
@@ -74,10 +66,10 @@ class ProfileDisplay extends StatelessWidget {
                       Hero(
                         tag: "Avatar",
                         child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                              "https://i.pinimg.com/236x/6a/c4/5e/6ac45ea5a3f5ace324b79b8f36d30f27.jpg"),
-                          radius: 50.0,
-                        ),
+                     child: Text("${Provider.of<User>(context).username[0].toUpperCase()}",style: TextStyle(color:Colors.white,fontSize: 30.0),),
+                     backgroundColor: Colors.purpleAccent,
+                        radius: 35.0,
+                      ),
                       ),
                       SizedBox(
                         height: 10.0,
@@ -101,7 +93,7 @@ class ProfileDisplay extends StatelessWidget {
                               maxLines: 1,
                               style: GoogleFonts.montserrat(
                                 textStyle: TextStyle(
-                                    color: Colors.white,
+                                    color: current_theme.font_color,
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.bold),
                               ),
@@ -122,7 +114,7 @@ class ProfileDisplay extends StatelessWidget {
                       ),
                       Text(
                         "${user.email}",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: current_theme.font_color),
                       )
                     ],
                   ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,6 +38,7 @@ class _HomeLoadingState extends State<HomeLoading> {
         String uid = preferences.getString('uid');
       Api api = Api();
       var task_details =await api.getTaskdetails(uid);
+     await Provider.of<User>(context,listen: false).getUser();
       return {'islogin':true,'theme':isLight,'task_details':task_details};
      }
       
@@ -61,7 +63,7 @@ class _HomeLoadingState extends State<HomeLoading> {
         child: Container(
           child: FutureBuilder(
             future: getUserDetails(),
-            builder: (context, AsyncSnapshot snapshot) {
+            builder: (context, AsyncSnapshot snapshot)  {
               if(snapshot.hasData){
                 print(snapshot.data);
                 if(snapshot.data['islogin'] && snapshot.data['userType'] == "admin") {
@@ -70,9 +72,9 @@ class _HomeLoadingState extends State<HomeLoading> {
                 }
                 else if(snapshot.data['islogin']){
                     Provider.of<TaskStats>(context,listen: false).getDetails(snapshot.data['task_details']);
-                    Provider.of<User>(context,listen: false).getUser();
-                    Provider.of<AppTheme>(context,listen: false).selectTheme(snapshot.data['theme']);
+                      Provider.of<AppTheme>(context,listen: false).selectTheme(snapshot.data['theme']);
                     return HomeDisplay();
+                    
                 }
                 else{
 
@@ -133,6 +135,7 @@ class HomeDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
     final task_details = Provider.of<TaskStats>(context);
+    final user = Provider.of<User>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text("Todoist",
@@ -154,12 +157,12 @@ class HomeDisplay extends StatelessWidget {
                           child: ProfilePage()));
                 },
                 child: Hero(
-                  tag: "Avatar",
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        "https://i.pinimg.com/236x/6a/c4/5e/6ac45ea5a3f5ace324b79b8f36d30f27.jpg"),
-                    radius: 22.0,
-                  ),
+                    tag: "Avatar",
+                                  child: CircleAvatar(
+                     child: Text("${user.username[0].toUpperCase()}",style: TextStyle(color:Colors.white),),
+                     backgroundColor: Colors.purpleAccent,
+                      radius: 22.0,
+                    ),
                 ),
               ),
             )
@@ -169,6 +172,7 @@ class HomeDisplay extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ListTags(
                     counter: task_details.today_count,
@@ -179,17 +183,8 @@ class HomeDisplay extends StatelessWidget {
                     ),
                     text: "Today",
                     iconBackgroundColor: Colors.blue,
+                    navigate_to: "today",
                   ),
-                  ListTags(
-                    counter: 0,
-                    icon: Icon(
-                      Icons.access_time,
-                      color: Colors.white,
-                      size: 30.0,
-                    ),
-                    text: "Scheduled",
-                    iconBackgroundColor: Colors.orange,
-                  )
                 ],
               ),
               Row(
@@ -203,6 +198,7 @@ class HomeDisplay extends StatelessWidget {
                     ),
                     text: "All",
                     iconBackgroundColor: Colors.grey,
+                    navigate_to: "all",
                   ),
                   ListTags(
                     counter: task_details.flagged_count,
@@ -213,6 +209,7 @@ class HomeDisplay extends StatelessWidget {
                     ),
                     text: "Flagged",
                     iconBackgroundColor: Colors.red,
+                    navigate_to: "starred",
                   )
                 ],
               ),
@@ -233,8 +230,9 @@ class ListTags extends StatelessWidget {
   final Icon icon;
   final text;
   final iconBackgroundColor;
+  final navigate_to ;
 
-  ListTags({this.counter, this.icon, this.text, this.iconBackgroundColor});
+  ListTags({this.counter, this.icon, this.text, this.iconBackgroundColor,this.navigate_to});
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +241,7 @@ class ListTags extends StatelessWidget {
     final _height = 100.0;
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser(display_type: navigate_to,)));
       },
       child: Container(
         margin: EdgeInsets.all(10.0),

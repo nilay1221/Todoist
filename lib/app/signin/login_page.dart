@@ -100,8 +100,9 @@ void onLoginSubmit() async {
         if(response!=null) {
              Provider.of<User>(context,listen: false).saveAdmin(response);
               await Provider.of<AppTheme>(context,listen: false).selectTheme(true);
-              Navigator.pop(context);
-            Navigator.push(context, MaterialPageRoute(builder: (context) => AdminHomePage()));
+              // Navigator.pop(context);
+              print("here");
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => AdminHomePage()), (route) => false);
 
         }
 

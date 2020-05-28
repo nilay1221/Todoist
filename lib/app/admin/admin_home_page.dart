@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:todoist/app/admin/blocked_user_page.dart';
 import 'package:todoist/app/admin/unblocked_user_page.dart';
 import 'package:todoist/pages/admin_dashboard.dart';
+import 'package:todoist/pages/settings.dart';
 
 class AdminHomePage extends StatefulWidget {
   @override
@@ -22,12 +23,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   void totalUser() async {
-    String url = "http://192.168.0.104/auth_api/api/admin_stats.php";
+    String url = "https://todoistapi.000webhostapp.com/admin_stats.php";
     Map data = {"id": "2"};
     var jsonData = jsonEncode(data);
     var response = await http.post(Uri.encodeFull(url), body: jsonData);
     if (response.statusCode == 200) {
-      var finalData = jsonDecode(response.body.substring(15));
+      var finalData = jsonDecode(response.body.toString());
       print(finalData);
       setState(() {
         _totalBlockedUser = finalData["allBlockedUsers"];
@@ -43,6 +44,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
         title: Text('Home Page'),
         centerTitle: true,
         titleSpacing: 1.0,
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.settings), onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder:(context) => Settings() ));
+          })
+        ],
       ),
       body: Column(
         children: <Widget>[

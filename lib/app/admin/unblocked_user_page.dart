@@ -24,12 +24,12 @@ class _UnBlockedUserPageState extends State<UnBlockedUserPage> {
   }
 
   listOfUnBlockedUser() async {
-    String url = "http://192.168.0.104/auth_api/api/admin_stats.php";
+    String url = "https://todoistapi.000webhostapp.com/admin_stats.php";
     Map data = {"id": "2"};
     var jsonData = jsonEncode(data);
     var response = await http.post(Uri.encodeFull(url), body: jsonData);
     if (response.statusCode == 200) {
-      var finalData = jsonDecode(response.body.substring(15));
+      var finalData = jsonDecode(response.body);
       print(finalData);
       setState(() {
         totalUnBlockedUser = finalData["allUnblockedUsersdata"];
@@ -38,7 +38,7 @@ class _UnBlockedUserPageState extends State<UnBlockedUserPage> {
   }
 
   void updateUserStatus(String id, String username) async {
-    String url = "http://192.168.0.104/auth_api/api/status_user.php";
+    String url = "https://todoistapi.000webhostapp.com/status_user.php";
     print("id = $id");
     Map data = {"id": id, "status": "0"};
     var jsonData = jsonEncode(data);
@@ -62,7 +62,7 @@ class _UnBlockedUserPageState extends State<UnBlockedUserPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text('Blocked Users'),
+        title: Text('Unblocked Users'),
         centerTitle: true,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(30),

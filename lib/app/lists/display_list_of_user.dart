@@ -9,6 +9,9 @@ import 'package:http/http.dart' as http;
 import 'package:todoist/models/Models.dart';
 
 class DisplayListOfUser extends StatefulWidget {
+
+  String display_type;
+  DisplayListOfUser({this.display_type});
   @override
   _DisplayListOfUserState createState() => _DisplayListOfUserState();
 }
@@ -19,22 +22,36 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   TextEditingController _controller;
   bool sorted = false;
   bool loading = false;
-  void _addNewTask() {
-    Navigator.of(context).push(
+  void _addNewTask() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
           fullscreenDialog: true,
           builder: (context) {
             return AddListPage();
           }),
     );
+    print("returned");
+    setState(() {
+      listOfTasks();
+    });
   }
 
   @override
   void initState() {
     super.initState();
 
-    checkLoginStatus();
-    listOfTasks();
+    // checkLoginStatus();
+    String display_type = widget.display_type;
+    if(display_type == "today") {
+      _todaysTask();
+    }
+    else if(display_type == "starred") {
+      _prioritizedTasks();
+    }
+    else {
+        listOfTasks();
+    }
+    
   }
 
   // this gives list of all the tasks by a user
@@ -65,7 +82,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
         print(displayResponse.body);
         setState(() {
           finalData = jsonDecode(
-              displayResponse.body.toString().substring(30))["allTasksdata"];
+              displayResponse.body.toString())["allTasksdata"];
           loading = false;
         });
         print(finalData);
@@ -129,8 +146,10 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     setState(() {
       loading = true;
     });
+
     var updateJsonData = jsonEncode(data);
-    String url = "https://todoistapi.000webhostapp.com/star_task.php";
+    String url = data['priority'] == "1" ? "https://todoistapi.000webhostapp.com/star_task.php" : "https://todoistapi.000webhostapp.com/unstar_task.php" ;
+    print(url);
     var response = await http.post(Uri.encodeFull(url), body: updateJsonData);
     if (response.statusCode == 200) {
       print(response.body);
@@ -233,19 +252,6 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
           ),
         ),
         actions: <Widget>[
-          FlatButton.icon(
-            onPressed: () {
-              sharedPreference.clear();
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => LandingPage()),
-                  (Route<dynamic> route) => false);
-            },
-            icon: Icon(
-              Icons.people,
-              color: Colors.teal,
-            ),
-            label: Text('Logout', style: TextStyle(color: Colors.teal)),
-          ),
           FlatButton.icon(
             onPressed: () async {
               var result = await showDialog(
@@ -373,8 +379,10 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                               key: Key('task-${DateTime.now()}'),
                               background: Container(color: Colors.red),
                               direction: DismissDirection.endToStart,
-                              onDismissed: (direction) =>
-                                  _delete(finalData[index]["id"]),
+                              onDismissed: (direction) {
+                                _delete(finalData[index]["id"]);
+                                Provider.of<TaskStats>(context,listen: false).taskDelete(finalData[index]);
+                              },   
                               child: ListTile(
                                 leading: FlatButton(
                                   child: CircleAvatar(
@@ -431,6 +439,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                                         "priority": "0"
                                       });
                                     }
+                                    Provider.of<TaskStats>(context,listen: false).starTask(finalData[index]["priority"]);
                                   },
                                 ),
                                 onTap: () {

@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:todoist/app/lists/display_list_of_user.dart';
 import 'package:todoist/models/Models.dart';
+import 'package:todoist/pages/home.dart';
 
 class AddListPage extends StatefulWidget {
   @override
@@ -54,9 +55,13 @@ class _AddListPageState extends State<AddListPage> {
             await http.post(Uri.encodeFull(createTaskUrl), body: taskJsonData);
         if (taskResponse.statusCode == 200) {
           print(taskResponse.body);
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => HomePage()),
-              (Route<dynamic> route) => false);
+          Provider.of<TaskStats>(context,listen: false).taskadd({'task': _task, 'date_time': _date});
+          // Navigator.of(context).pushAndRemoveUntil(
+          //     MaterialPageRoute(builder: (context) => DisplayListOfUser()),
+          //     ModalRoute.withName('/home'));
+          Navigator.pop(context);
+          // Navigator.pop(context);
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser()));
         }
       }
     }
@@ -139,7 +144,10 @@ class _AddListPageState extends State<AddListPage> {
                       padding: EdgeInsets.only(left: 50, right: 50),
                       textColor: Colors.white,
                       child: Text('Add Task'),
-                      onPressed: _addTask,
+                      onPressed: () {
+                        _addTask();
+
+                      },
                     ),
                   ),
                 ],

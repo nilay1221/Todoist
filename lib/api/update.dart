@@ -96,7 +96,16 @@ class Api{
 
   Future<Map> dashboardDetails() async {
 
-    Response response = await dio.post("https://todoistapi.000webhostapp.com/admin_stats.php");
+    Response response ;
+    while(true) {
+      try{
+    response = await dio.post("https://todoistapi.000webhostapp.com/admin_stats.php");
+    break;
+      }
+      catch(e) {
+        print(e);
+      }
+    }
     // print(response.statusCode);
     // print(response);
     if(response.statusCode == 200) {
@@ -120,7 +129,17 @@ class Api{
   Future<int> getCompletedTasks() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     var token = preferences.getString('token');
-     Response response = await dio.post("https://todoistapi.000webhostapp.com/validate_token.php",data: {"jwt" : token});
+    Response response;
+    while(true) {
+      try{
+        response = await dio.post("https://todoistapi.000webhostapp.com/validate_token.php",data: {"jwt" : token});
+        break;
+    } 
+    catch(e) {
+      print(e);
+    }}
+       
+    
     if(response.statusCode == 200) {
       String uid = response.data['data']['id'] ;
       DateTime today_date = DateTime.now();
@@ -140,27 +159,30 @@ class Api{
   Future<List> getGraphdetails() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     var token = preferences.getString('token');
-    // String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9leGFtcGxlLm9yZyIsImF1ZCI6Imh0dHA6XC9cL2V4YW1wbGUuY29tIiwiaWF0IjoxMzU2OTk5NTI0LCJuYmYiOjEzNTcwMDAwMDAsImRhdGEiOnsiaWQiOiIyNCIsInVzZXJuYW1lIjoic21pdCBzaGFoIiwiaW1hZ2UiOiJpbWFnZS5wbmciLCJlbWFpbCI6InNtaXQxMjVAZ21haWwuY29tIn19.SgeSZVbS2lGfKwUwy2mQekeso8r04ZKLMZoI-ZLph0g";
     Response response = await dio.post("https://todoistapi.000webhostapp.com/validate_token.php",data: {"jwt" : token});
     if(response.statusCode == 200) {
       String uid = response.data['data']['id'] ;
       DateTime today_date = DateTime.now();
        response = await dio.post("https://todoistapi.000webhostapp.com/user_stats.php",data: {"uid":uid.toString()});
       //  print(response.data['allTasksdata']);
+      // print(response.data);
       var task_data = response.data['allTasksdata'];
       List<int> details = new List<int>.filled(7,0);
       task_data.forEach((element) {
-        if(element['status'] == 1) {
+        // print(element);
+        if(element['status'] == "1") {
           DateTime task_date = DateTime.parse(element['date_time']);
-        int diff = today_date.difference(task_date).inDays ;
-        // print(diff);
-        if (diff <= 7) {
+        if(task_date.month == today_date.month && task_date.year == today_date.year) {
+          var diff = today_date.day - task_date.day;
+          if(diff >=0 && diff <= 7) {
             details[diff] += 1;
-          }
+          } 
+        }
         }
         
 
       });
+      // print(details);
      return details;
     }
     else{
@@ -173,8 +195,20 @@ class Api{
 
   Future<Map> getTaskdetails(String uid) async {
     Map data = {'uid': uid};
+    print("Printing uid");
+    print(uid);
     Map details = Map() ;
-    Response response = await dio.post("https://todoistapi.000webhostapp.com/user_stats.php",data: data);
+    Response response;
+    while(true) {
+      try{
+      response = await dio.post("https://todoistapi.000webhostapp.com/user_stats.php",data: data);
+      break;
+      }
+      catch(e)
+      {
+        print(e);
+      }
+    }
     if(response.statusCode == 200) {
       details['all'] = response.data['allTasksOfUser'];
       details['flagged'] = response.data['starredTasksOfUser'];
@@ -183,7 +217,10 @@ class Api{
       DateTime today_date = DateTime.now();
       all_tasks.forEach((element) {
         DateTime task_date = DateTime.parse(element['date_time']);
-        if(today_date.difference(task_date).inDays == 0 ) {
+        print("Difference ${today_date.difference(task_date).inDays} ");
+        if(today_date.difference(task_date).inDays == 0  && today_date.day == task_date.day) {
+          print("Today Date : ${today_date.day}");
+          print(task_date.day);
             today_count += 1;
         }
       });

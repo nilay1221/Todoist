@@ -16,9 +16,11 @@ class DashboarLoading extends StatelessWidget {
   Future<Map> getDetails() async {
     Api api = Api();
     Map data = await api.dashboardDetails();
-    print(data);
-    int percent = 100 - (((data['total_tasks'] - data['completed_tasks']) ~/ data['total_tasks']) *100);
+    // print(data);
+    // print(((data['total_tasks'] - data['completed_tasks']) / data['total_tasks']));
+    int percent = 100 - (((data['total_tasks'] - data['completed_tasks']) / data['total_tasks']) *100).toInt();
     data['percentage'] = percent;
+    // print(data['percentage']);
     return data;
   }
 
