@@ -36,7 +36,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     );
     print("returned");
     setState(() {
-      listOfTasks();
+      // listOfTasks();
     });
   }
 

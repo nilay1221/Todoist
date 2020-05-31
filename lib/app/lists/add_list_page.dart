@@ -56,10 +56,10 @@ class _AddListPageState extends State<AddListPage> {
         if (taskResponse.statusCode == 200) {
           print(taskResponse.body);
           Provider.of<TaskStats>(context,listen: false).taskadd({'task': _task, 'date_time': _date});
-          // Navigator.of(context).pushAndRemoveUntil(
-          //     MaterialPageRoute(builder: (context) => DisplayListOfUser()),
-          //     ModalRoute.withName('/home'));
-          Navigator.pop(context);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => DisplayListOfUser.create(context)),
+              ModalRoute.withName('/home'));
+          // Navigator.pop(context);
           // Navigator.pop(context);
           // Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser()));
         }

@@ -241,7 +241,7 @@ class ListTags extends StatelessWidget {
     final _height = 100.0;
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser(display_type: navigate_to,)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser.create(context)));
       },
       child: Container(
         margin: EdgeInsets.all(10.0),
