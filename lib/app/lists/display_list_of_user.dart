@@ -5,8 +5,14 @@ import 'package:todoist/app/landing_page.dart';
 import 'package:todoist/app/lists/add_list_page.dart';
 import 'package:todoist/app/lists/display_list_bloc.dart';
 import 'package:todoist/app/services/operations.dart';
+import 'package:todoist/models/Models.dart';
 
 class DisplayListOfUser extends StatefulWidget {
+
+  String sortBy;
+
+  DisplayListOfUser({this.sortBy});
+
   static Widget create(BuildContext context) {
     return Provider<DisplayListBloc>(
       create: (_) => DisplayListBloc(),
@@ -43,7 +49,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   @override
   void initState() {
     super.initState();
-    checkLoginStatus();
+    // checkLoginStatus();
   }
 
   // this checks the login status of the user
@@ -57,11 +63,12 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   }
 
   //this method deletes a particular task by a user
-  void _delete(String id) async {
+  void _delete(Map data) async {
     final bloc = Provider.of<DisplayListBloc>(context, listen: false);
     bloc.setStreamData(
         {'loading': true, 'time': false, 'today': false, 'priority': false});
-    await object.delete(id);
+    await object.delete(data['id']);
+    Provider.of<TaskStats>(context,listen:false).taskDelete(data);
     bloc.setStreamData(
         {'loading': false, 'time': false, 'today': false, 'priority': false});
   }
@@ -82,6 +89,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     bloc.setStreamData(
         {'loading': true, 'time': false, 'today': false, 'priority': false});
     await object.starTask(data);
+    Provider.of<TaskStats>(context,listen: false).starTask(data['priority']);
     bloc.setStreamData(
         {'loading': false, 'time': false, 'today': false, 'priority': false});
   }
@@ -322,7 +330,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                                 child: Icon(Icons.delete, color: Colors.white)),
                             direction: DismissDirection.endToStart,
                             onDismissed: (direction) =>
-                                _delete(data[index]["id"]),
+                                _delete(data[index]),
                             child: ListTile(
                               leading: FlatButton(
                                 child: CircleAvatar(

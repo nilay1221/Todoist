@@ -15,6 +15,7 @@ class Api{
   dio.options.headers['access-control-max-age'] = "3600" ;
   dio.options.headers['access-control-allow-headers'] = "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With";
   dio.options.headers['access-control-allow-origin'] = "http://localhost:80/auth_api/";
+  dio.options.receiveTimeout = 5000;
    }
 
   Future<bool> CreateUser(String username , String email,String password) async {
@@ -38,7 +39,7 @@ class Api{
   Future<Map> loginUser(String email ,String password) async {
       Map data = {'email':email,'password':password}; 
       Response response = await dio.post('https://todoistapi.000webhostapp.com/login.php',data: data) ;
-      // print(response.data);
+      print(response.data);
       var parsedJson = response.data;
       // print(parsedJson);
       if(response.statusCode == 200) {
@@ -156,7 +157,7 @@ class Api{
   
   }
 
-  Future<List> getGraphdetails() async {
+  Future<Map<String,dynamic>> getGraphdetails() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     var token = preferences.getString('token');
     Response response = await dio.post("https://todoistapi.000webhostapp.com/validate_token.php",data: {"jwt" : token});
@@ -167,6 +168,7 @@ class Api{
       //  print(response.data['allTasksdata']);
       // print(response.data);
       var task_data = response.data['allTasksdata'];
+      var completedTasks = response.data['completedTasksOfUser'];
       List<int> details = new List<int>.filled(7,0);
       task_data.forEach((element) {
         // print(element);
@@ -183,7 +185,7 @@ class Api{
 
       });
       // print(details);
-     return details;
+     return {'completed' : completedTasks,'graph':details};
     }
     else{
       return null;

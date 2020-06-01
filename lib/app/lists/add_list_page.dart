@@ -58,7 +58,7 @@ class _AddListPageState extends State<AddListPage> {
           Provider.of<TaskStats>(context,listen: false).taskadd({'task': _task, 'date_time': _date});
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => DisplayListOfUser.create(context)),
-              ModalRoute.withName('/home'));
+              ModalRoute.withName('/login'));
           // Navigator.pop(context);
           // Navigator.pop(context);
           // Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayListOfUser()));

@@ -207,49 +207,36 @@ class TaskStatistic extends StatelessWidget {
                   //     onPressed: () {})
                 ],
               ),
-              Container(
+              FutureBuilder(
+                future: api.getGraphdetails(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if(snapshot.hasData) {
+                      return Container(
                 alignment: AlignmentDirectional.topStart,
                 child: Column(
                   children: <Widget>[
-                    FutureBuilder(
-                      future: api.getCompletedTasks(),
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          var count = snapshot.data;
-                          return Text(
-                            "${snapshot.data}",
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "${snapshot.data['completed']}",
                             style: TextStyle(
                                 fontSize: 30.0,
                                 fontWeight: FontWeight.bold,
                                 color: theme.font_color),
-                          );
-                        }
-                        else{
-                          return Text(
-                            "0",
-                            style: TextStyle(
-                                fontSize: 30.0,
-                                fontWeight: FontWeight.bold,
-                                color: theme.font_color),
-                          );
-                        }
-                      },
-                    ),
+                          ),
                     Text(
                       "Total Completion",
                       style: TextStyle(
                         color: theme.font_color,
                         fontSize: 12.0,
                       ),
-                    )
-                  ],
-                ),
-              ),
-              FutureBuilder(
-                future: api.getGraphdetails(),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasData) {
-                    return TweenAnimationBuilder(
+                    ),
+                      ],),
+                    ),
+                    TweenAnimationBuilder(
                       duration: const Duration(seconds: 1, milliseconds: 5),
                       tween: Tween<double>(begin: 20.0, end: 5.0),
                       curve: Curves.easeOutCubic,
@@ -257,19 +244,20 @@ class TaskStatistic extends StatelessWidget {
                           (BuildContext context, dynamic value, Widget child) {
                         return TaskChart(
                           maxTasks: value,
-                          numberOfTasks: snapshot.data,
+                          numberOfTasks: snapshot.data['graph'],
                         );
                       },
-                    );
-                  } else {
-                    return CircularProgressIndicator();
+                    ),
+
+                  ],
+                ),
+              );
                   }
+                  else{
+                    return CircularProgressIndicator();
+                  } 
                 },
               ),
-
-              // TaskChart(
-              //   maxTasks: 5.0,
-              // )
             ],
           ),
         ));
