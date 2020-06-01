@@ -133,10 +133,10 @@ class TaskStats extends ChangeNotifier {
   void starTask(String status){
     print("inside star task");
     print(status);
-    if(status == "1") {
+    if(status == "0") {
       this.flagged_count -= 1;
     }
-    else if (status == "0") {
+    else if (status == "1") {
       this.flagged_count += 1;
     }
     notifyListeners();

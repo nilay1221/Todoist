@@ -5,6 +5,8 @@ import 'package:todoist/app/landing_page.dart';
 import 'package:todoist/app/lists/add_list_page.dart';
 import 'package:todoist/app/lists/display_list_bloc.dart';
 import 'package:todoist/app/services/operations.dart';
+import 'package:todoist/models/Models.dart';
+import 'package:todoist/utils/theme.dart';
 
 class DisplayListOfUser extends StatefulWidget {
   bool today;
@@ -63,10 +65,11 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
   }
 
   //this method deletes a particular task by a user
-  void _delete(String id) async {
+  void _delete(Map task) async {
     widget.bloc.setStreamData(
         {'loading': true, 'time': false, 'today': false, 'priority': false});
-    await object.delete(id);
+    await object.delete(task['id']);
+    Provider.of<TaskStats>(context,listen: false).taskDelete(task);
     widget.bloc.setStreamData(
         {'loading': false, 'time': false, 'today': false, 'priority': false});
   }
@@ -85,6 +88,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     widget.bloc.setStreamData(
         {'loading': true, 'time': false, 'today': false, 'priority': false});
     await object.starTask(data);
+    Provider.of<TaskStats>(context,listen: false).starTask(data['priority']);
     widget.bloc.setStreamData(
         {'loading': false, 'time': false, 'today': false, 'priority': false});
   }
@@ -93,6 +97,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
     widget.bloc.setStreamData(
         {'loading': true, 'time': false, 'today': false, 'priority': false});
     await object.unstarTask(data);
+    Provider.of<TaskStats>(context,listen: false).starTask(data['priority']);
     widget.bloc.setStreamData(
         {'loading': false, 'time': false, 'today': false, 'priority': false});
   }
@@ -108,10 +113,14 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
 
   @override
   Widget build(BuildContext context) {
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: _currentTheme.scaffold_color,
       appBar: AppBar(
-          backgroundColor: Colors.black,
+          backgroundColor: _currentTheme.scaffold_color,
+          iconTheme: IconThemeData(
+            color: _currentTheme.font_color
+          ),
           title: Text(
             'Tasks',
             style: TextStyle(
@@ -188,6 +197,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                 child: ListView.builder(
                   itemCount: data.length,
                   itemBuilder: (BuildContext context, index) {
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
                     return data[index]["date_time"] == "not today"
                         ? Container()
                         : Dismissible(
@@ -198,7 +208,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                                 child: Icon(Icons.delete, color: Colors.white)),
                             direction: DismissDirection.endToStart,
                             onDismissed: (direction) =>
-                                _delete(data[index]["id"]),
+                                _delete(data[index]),
                             child: ListTile(
                               leading: FlatButton(
                                 child: CircleAvatar(
@@ -208,7 +218,7 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                                     radius: 11,
                                     backgroundColor:
                                         data[index]["status"] == "0"
-                                            ? Colors.black
+                                            ? Colors.grey
                                             : Colors.teal,
                                   ),
                                 ),
@@ -230,18 +240,18 @@ class _DisplayListOfUserState extends State<DisplayListOfUser> {
                               title: data[index]["status"] == "1"
                                   ? Text('${data[index]["task"]}',
                                       style: TextStyle(
-                                          color: Colors.white,
+                                          color: _currentTheme.font_color,
                                           fontSize: 18,
                                           decoration:
                                               TextDecoration.lineThrough))
                                   : Text('${data[index]["task"]}',
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 18)),
+                                          color: _currentTheme.font_color, fontSize: 18)),
                               trailing: FlatButton(
                                 child: Icon(
                                   Icons.star,
                                   color: data[index]["priority"] == "0"
-                                      ? Colors.grey[300]
+                                      ? Colors.grey
                                       : Colors.teal,
                                 ),
                                 onPressed: () {

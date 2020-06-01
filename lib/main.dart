@@ -12,19 +12,6 @@ import 'package:todoist/utils/theme.dart';
 import 'models/Models.dart';
 
 void main() async{
-  // WidgetsFlutterBinding.ensureInitialized();
-  // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]).then((_) {
-  //   SharedPreferences.getInstance().then((prefs) {
-  //     var isLight = prefs.getBool('isLight') ?? false;
-  //     runApp(
-  //       ChangeNotifierProvider<AppTheme>(
-  //         create: (_) => AppTheme(isLight),
-  //         child: MyApp(),
-  //       ),
-  //     );
-  //   });
-  // });
-
   runApp(MyApp());
 }
 
@@ -37,7 +24,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<User>(create: (context) => User(),),
         ChangeNotifierProvider<AppTheme>(create: (context) => AppTheme(),),
-         ChangeNotifierProvider<TaskStats>(create: (context) => TaskStats(),)
+        ChangeNotifierProvider<TaskStats>(create: (context) => TaskStats(),)
       ],
       child: MaterialApp(
         title: "Todoist App",

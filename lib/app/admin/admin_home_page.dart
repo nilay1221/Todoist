@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:todoist/app/admin/blocked_user_page.dart';
 import 'package:todoist/app/admin/unblocked_user_page.dart';
 import 'package:todoist/pages/admin_dashboard.dart';
 import 'package:todoist/pages/settings.dart';
+import 'package:todoist/utils/theme.dart';
 
 class AdminHomePage extends StatefulWidget {
   @override
@@ -39,13 +41,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
     return Scaffold(
+      backgroundColor: _currentTheme.scaffold_color,
       appBar: AppBar(
-        title: Text('Home Page'),
+        backgroundColor: _currentTheme.scaffold_color,
+        title: Text('Home Page',style: TextStyle(color: _currentTheme.font_color),),
         centerTitle: true,
         titleSpacing: 1.0,
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.settings), onPressed: () {
+          IconButton(icon: Icon(Icons.settings,color: _currentTheme.font_color,), onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder:(context) => Settings() ));
           })
         ],
@@ -61,6 +66,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   Widget _buildContent(BuildContext context) {
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
+    print(_currentTheme.container_color);
     return Container(
       padding: EdgeInsets.all(16.0),
       child: Row(
@@ -69,6 +76,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             child: SizedBox(
               height: MediaQuery.of(context).size.height / 4,
               child: RaisedButton(
+                color: _currentTheme.container_color,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18.0),
                 ),
@@ -79,11 +87,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     children: <Widget>[
                       Text(
                         'Blocked User',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 20,color: _currentTheme.font_color),
                       ),
                       Text(
                         "$_totalBlockedUser",
                         textAlign: TextAlign.start,
+                        style: TextStyle(color: _currentTheme.font_color),
                       )
                     ],
                   ),
@@ -106,6 +115,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             child: SizedBox(
               height: MediaQuery.of(context).size.height / 4,
               child: RaisedButton(
+                color: _currentTheme.container_color,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18.0),
                 ),
@@ -116,11 +126,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     children: <Widget>[
                       Text(
                         'Unblocked User',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 20,color: _currentTheme.font_color),
                       ),
                       Text(
                         "$_totalUnblockedUser",
                         textAlign: TextAlign.start,
+                        style: TextStyle(color: _currentTheme.font_color),
                       )
                     ],
                   ),
@@ -146,14 +157,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
 
 Widget dashboardButton(BuildContext context) {
-
+    final _currentTheme = Provider.of<AppTheme>(context).currentTheme;
   return SizedBox(
     height: 50.0,
       child: RaisedButton(
+      color: _currentTheme.container_color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0)
       ),
-      child: Text("View Dashboard"),
+      child: Text("View Dashboard",style: TextStyle(color:_currentTheme.font_color),),
       onPressed: () {
       Navigator.of(context).push(
                     MaterialPageRoute(
